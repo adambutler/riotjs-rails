@@ -1,6 +1,10 @@
+# riotjs-rails <a href="http://badge.fury.io/rb/riotjs-rails"><img src="https://badge.fury.io/rb/riotjs-rails@2x.png" alt="Gem Version" height="18"></a>
+
+### About
+
 Rails 3.1+ asset-pipeline gem to provide riot.js
 
-# Setup
+### Setup
 
 Have in your Gemfile:
 
