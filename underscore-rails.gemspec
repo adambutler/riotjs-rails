@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.email       = ["adam@lab.io"]
   s.homepage    = "https://github.com/adambutler/riotjs-rails"
   s.summary     = %q{riot.js asset pipeline provider/wrapper}
+  s.description = "A simple asset-pipeline wrapper for riot.js by moot"
   s.license     = "MIT"
 
   s.rubyforge_project = "riotjs-rails"
