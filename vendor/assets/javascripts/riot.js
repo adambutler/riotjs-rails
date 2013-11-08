@@ -1,12 +1,4 @@
-/*
-
-   Riot.js 0.9.0 | moot.it/riotjs
-
-   (c) 2013 Tero Piirainen, Moot Inc
-
-   @license: MIT
-
-*/
+/* Riot.js 0.9.1 | moot.it/riotjs | (c) 2013 Moot Inc | @license: MIT */
 (function($, win) {
 
    // Precompiled templates (JavaScript functions)
@@ -17,20 +9,18 @@
    // Render a template with data
    $.render = function(template, data) {
       return (FN[template] = FN[template] || Function("_", "return '" +
-         $.trim(template).replace(/\n/g, "\\n").replace(/\{([^\}]+)\}/g, "'+_.$1+'") + "'")
+         $.trim(template)
+            .replace(/\n/g, "\\n")
+            .replace(/'/g, "\\'")
+            .replace(/\{(\w+)\}/g, "' + (_.$1 || '') + '") + "'")
       )(data);
-   }
-
-   // A convenience render method to return a jQuery element
-   $.el = function(template, data) {
-      return $($.render(template, data));
    }
 
    // A classic pattern for separating concerns
    $.observable = function(obj) {
       var jq = $({});
 
-      $.each(['on', 'one', 'emit', 'off'], function(i, name) {
+      $.each(['on', 'one', 'trigger', 'off'], function(i, name) {
          obj[name] = function(names, fn) {
 
             if (i < 2) {
@@ -49,6 +39,7 @@
 
             return obj;
          }
+
       })
 
       return obj;
