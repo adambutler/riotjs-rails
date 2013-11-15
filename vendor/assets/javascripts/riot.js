@@ -1,20 +1,15 @@
 
-/*
-  Riot.js 0.9.4 | moot.it/riotjs | @license MIT
-  (c) 2013 Tero Piirainen, Moot Inc and other contributors.
- */
-(function(top) { "use strict";
 
-  var $ = top.$ = top.$ || {};
+(function(is_node) { "use strict";
+  /*global exports, window, setTimeout, history, location, document */
+
+  var top = is_node ? exports : window,
+    $ = is_node ? top : top.$ = top.$ || {};
 
   // avoid multiple execution. popstate should be fired only once etc.
   if ($.riot) return;
 
-  $.riot = "0.9.4";
-
-  function isFunction(el) {
-    return Object.prototype.toString.call(el) == '[object Function]';
-  }
+  $.riot = "0.9.5";
 
   $.observable = function(el) {
 
@@ -22,7 +17,8 @@
       slice = [].slice;
 
     el.on = function(events, fn) {
-      if (isFunction(fn)) {
+
+      if (typeof fn == "function") {
         events = events.split(/\s+/);
 
         for (var i = 0, len = events.length, type; i < len; i++) {
@@ -34,41 +30,21 @@
       return el;
     };
 
-    el.off = function(events, fn) {
+    el.off = function(events) {
       events = events.split(/\s+/);
 
-      for (var j = 0, type; j < events.length; j++) {
-        type = events[j];
-
-        // remove single type
-        if (!fn) { callbacks[type] = []; continue; }
-
-        var fns = callbacks[type] || [],
-          pos = -1;
-
-        for (var i = 0, len = fns.length; i < len; i++) {
-          if (fns[i] === fn || fns[i].listener === fn) { pos = i; break; }
-        }
-
-        if (pos >= 0) fns.splice(pos, 1);
+      for (var i = 0; i < events.length; i++) {
+        callbacks[events[i]] = [];
       }
+
       return el;
     };
 
     // only single event supported
     el.one = function(type, fn) {
+      if (fn) fn.one = true;
+      return el.on(type, fn);
 
-      function on() {
-        el.off(type, fn);
-        fn.apply(el, arguments);
-      }
-
-      if (isFunction(fn)) {
-        on.listener = fn;
-        el.on(type, on);
-      }
-
-      return el;
     };
 
     el.trigger = function(type) {
@@ -76,15 +52,15 @@
       var args = slice.call(arguments, 1),
         fns = callbacks[type] || [];
 
-      for (var i = 0, len = fns.length, fn, added; i < len; ++i) {
+      for (var i = 0, fn; i < fns.length; ++i) {
         fn = fns[i];
 
-        // possibly removed
-        if (!fn) continue;
+        if (fn.one && fn.done) continue;
 
         // add event argument when multiple listeners
         fn.apply(el, fn.typed ? [type].concat(args) : args);
 
+        fn.done = true;
       }
 
       return el;
@@ -94,40 +70,41 @@
 
   };
 
-  // emit window.popstate event consistently on page load, on every browser
-  var page_popped,
-    fn = $.observable({});
+  if (is_node) return;
+
+  // cross browser popstate
+  var currentHash,
+    fn = $.observable({}),
+    listen = top.addEventListener,
+    doc = document;
 
   function pop(hash) {
-    fn.trigger("pop", hash || top.location.hash);
+    hash = hash.type ? location.hash : hash;
+    if (hash != currentHash) fn.trigger("pop", hash);
+    currentHash = hash;
   }
 
-  function on(event, fn) {
-    top.addEventListener(event, fn, false);
+  if (listen) {
+    listen("popstate", pop, false);
+    doc.addEventListener("DOMContentLoaded", pop, false);
+
+  } else {
+    doc.attachEvent("onreadystatechange", function() {
+      if (doc.readyState == "complete") pop("");
+    });
+
   }
-
-  on("load", function() {
-    top.setTimeout(function() { page_popped || pop(); }, 1);
-  });
-
-  on("popstate", function(e) {
-    if (!page_popped) page_popped = true;
-    pop();
-  });
 
   // Change the browser URL or listen to changes on the URL
   $.route = function(to) {
 
     // listen
-    if (isFunction(to)) {
-      fn.on("pop", to);
+    if (typeof to == "function") return fn.on("pop", to);
 
     // fire
-    } else if (to != top.location.hash) {
-      if (top.history.pushState) top.history.pushState("", "", to);
-      pop(to);
-    }
+    if (history.pushState) history.pushState(0, 0, to);
+    pop(to);
 
   };
 
-})(window);
+})(typeof exports == "object");
