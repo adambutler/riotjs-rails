@@ -13,3 +13,16 @@ Have in your Gemfile:
 And, have in your application.js manifest:
 
 	//= require riot
+
+or the minimized version
+
+	//= require riot.min
+
+### Author
+
+**Adam Butler** <http://github.com/adambutler>
+
+### Contributors
+
+**Lleir Borras** <http://github.com/lleirborras>
+
