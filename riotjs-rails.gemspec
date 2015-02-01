@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'tilt', '~> 1.1'
   s.add_dependency 'execjs'
+  s.add_dependency 'actionview'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'rspec'
 end
